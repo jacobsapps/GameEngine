@@ -51,9 +51,17 @@ public class GameEngine: ObservableObject {
     
     public func handleInput(at location: CGPoint) {
         guard isRunning, let scene = currentScene else { return }
-        
-        // Convert screen coordinates to world coordinates
         let worldLocation = scene.camera.screenToWorld(location)
         scene.handleInput(at: worldLocation)
+    }
+    
+    public func handleKeyPress(_ key: KeyEquivalent) {
+        guard isRunning, let scene = currentScene else { return }
+        scene.handleKeyPress(key)
+    }
+    
+    public func handleKeyRelease(_ key: KeyEquivalent) {
+        guard isRunning, let scene = currentScene else { return }
+        scene.handleKeyRelease(key)
     }
 }

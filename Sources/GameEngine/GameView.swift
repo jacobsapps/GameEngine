@@ -14,12 +14,21 @@ public struct GameView: View {
                 engine.update(currentTime: context.date)
                 engine.render(context: graphicsContext, size: size)
             }
+            .focusable()
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
                         engine.handleInput(at: value.location)
                     }
             )
+            .onKeyPress(phases: .all) { keyPress in
+                if keyPress.phase == .down {
+                    engine.handleKeyPress(keyPress.key)
+                } else if keyPress.phase == .up {
+                    engine.handleKeyRelease(keyPress.key)
+                }
+                return .handled
+            }
         }
         .onAppear {
             engine.setScene(scene)

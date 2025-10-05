@@ -1,4 +1,7 @@
 import SwiftUI
+#if os(iOS)
+import CoreMotion
+#endif
 
 @MainActor
 open class GameScene {
@@ -6,9 +9,14 @@ open class GameScene {
     public var isActive: Bool = true
     public var camera: Camera = Camera()
     public var screenSize: CGSize = .zero
+    public var accelerometerData: (x: Double, y: Double, z: Double) = (0, 0, 0)
     
     internal var objectsToAdd: [GameObject] = []
     internal var objectsToRemove: [GameObject] = []
+    #if os(iOS)
+    private var motionManager: CMMotionManager?
+    private var accelerometerEnabled = false
+    #endif
     
     public init() {}
     
@@ -49,6 +57,37 @@ open class GameScene {
     
     open func handleInput(at location: CGPoint) {
         // Override in subclasses
+    }
+    
+    open func handleKeyPress(_ key: KeyEquivalent) {
+        // Override in subclasses
+    }
+    
+    open func handleKeyRelease(_ key: KeyEquivalent) {
+        // Override in subclasses
+    }
+    
+    public func enableAccelerometer() {
+        #if os(iOS)
+        guard !accelerometerEnabled else { return }
+        accelerometerEnabled = true
+        motionManager = CMMotionManager()
+        guard let mm = motionManager, mm.isAccelerometerAvailable else { return }
+        mm.accelerometerUpdateInterval = 1.0 / 60.0
+        mm.startAccelerometerUpdates(to: .main) { [weak self] data, _ in
+            guard let data = data else { return }
+            self?.accelerometerData = (data.acceleration.x, data.acceleration.y, data.acceleration.z)
+        }
+        #endif
+    }
+    
+    public func disableAccelerometer() {
+        #if os(iOS)
+        accelerometerEnabled = false
+        motionManager?.stopAccelerometerUpdates()
+        motionManager = nil
+        accelerometerData = (0, 0, 0)
+        #endif
     }
     
     public func addGameObject(_ gameObject: GameObject) {
